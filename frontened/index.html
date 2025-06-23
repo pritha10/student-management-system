@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Management System</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background-color: #fff;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        table {
+            width: 100%;
+            margin-top: 30px;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+        .delete-btn {
+            background-color: #dc3545;
+        }
+        .delete-btn:hover {
+            background-color: #a71d2a;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Student Management System</h1>
+
+        <div class="form-group">
+            <label for="name">Name:</label>
+            <input id="name" placeholder="Enter name">
+        </div>
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input id="email" placeholder="Enter email">
+        </div>
+        <div class="form-group">
+            <label for="age">Age:</label>
+            <input id="age" type="number" placeholder="Enter age">
+        </div>
+
+        <button onclick="addStudent()">Add Student</button>
+        <button onclick="getStudents()" style="background-color: #28a745; margin-left: 10px;">Refresh List</button>
+
+        <table id="studentsTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Age</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        function addStudent() {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const age = document.getElementById('age').value;
+
+            fetch('http://127.0.0.1:5000/students', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ name, email, age })
+            })
+            .then(res => res.json())
+            .then(() => {
+                alert('Student added!');
+                getStudents();
+            });
+        }
+
+        function getStudents() {
+            fetch('http://127.0.0.1:5000/students')
+            .then(res => res.json())
+            .then(data => {
+                const tableBody = document.querySelector('#studentsTable tbody');
+                tableBody.innerHTML = '';
+                data.forEach(student => {
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td>${student.id}</td>
+                            <td>${student.name}</td>
+                            <td>${student.email}</td>
+                            <td>${student.age}</td>
+                            <td><button class="delete-btn" onclick="deleteStudent(${student.id})">Delete</button></td>
+                        </tr>`;
+                });
+            });
+        }
+
+        function deleteStudent(id) {
+            fetch(`http://127.0.0.1:5000/students/${id}`, { method: 'DELETE' })
+            .then(res => res.json())
+            .then(() => {
+                alert('Student deleted!');
+                getStudents();
+            });
+        }
+
+        window.onload = getStudents;
+    </script>
+</body>
+</html>
